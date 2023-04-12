@@ -1,0 +1,83 @@
+Ejercicio 17 (Gestion de baños en un parcial) GDB
+
+1-Un alumno puede concurrir al baño si ningun otro esta en el baño (uno por baño). Caso contrario espera.
+2-Si esta esperando puede decidir volver a sentarse (pierde su lugar en la fila).
+3-Regresa un alumno del baño y AUTOMATICAMENTE va el primero de los alumnos que esta esperando.
+4-Regresa un alumno del baño y la fila > o = 5, entonces va toda la cola al baño acompañado de un docente (#alumnos + docente)
+5-Maxima cantidad de veces que puede ir un alumno al baño: 3 veces.
+6-Se desea conocer en todo momento el alumno que se encuentra en el baño.
+
+
+filaAlumno: cola(datoAlumno)
+datoAlumno: <alumno, nat>	//donde nat me indica la cantidad de veces que fue al baño
+alumno: string
+
+
+observadores basicos:
+
+//PREGUNTAR PUEDO LLAMAR A UN OBSERVADOR DENTRO DE OTRO OBSERVADOR?
+
+vaAlBaño?: GDB x alumno -> bool {NO maximoPermitodo(gdb,da)} // tiene que chequear si puede o no ir al baño. Va a ir si no hay nadie en el baño, si es el primero en la fila.
+-maximoPermitido: GDB x datoAlumno -> bool
+filaActual: GDB -> filaAlumno
+alumnosEnElBaño: GDB -> conj(alumno) //usamos conj porque aveces puede pasar que haya mas de una persona en el baño.
+cantidadDeVecesQueFue: GDB -> conj(datoAlumno) 
+
+
+generadores:
+
+abroBaño: -> GDB
+alumnoVaALaFila: filaAlumno x alumno -> GDB 
+saleDeLaFila: filaAlumno x alumno -> GDB				{alumno pertenece cola(alumno)}   donde nat me indica la cantidad de veces que fue al baño
+regresaAlumno: alumno x filaAlumno -> GDB		{alumno NOpertence cola(alumno)}  
+
+
+AXIOMAS: observadores(generadores())
+----------------------------------------------------------------------------------------------------
+vaAlBaño?(abroBaño(), alumno) = True PREGUNTAR
+vaAlBaño?(alumnoVaALaFila(filaAlumno, alumno'), alumno) = if (alumno' != alumno) then vaAlBaño?(gdb, alumno, filaAlumno) 
+													else 
+														if(vacio?(filaAlumno) y vacio?(alumnoEnElBaño(gdb)) then True
+															else 
+																if (alumno = proximo(filaAlumno)) y vacio?(alumnoEnElBaño(gdb)) then True
+																	else False
+																fi
+														fi
+												fi
+
+//PREGUNTAR
+vaAlBaño?(saleDeLaFila(filaAlumno, alumno'), alumno)= if (alumno' = alumno) then False 
+												else vaAlBaño?(gdb,alumno, filaAlumno) //esto es lo que no me queda claro
+											fi 
+															
+//PREGUNTAR
+vaAlBaño?(regresaAlumno(alumno',filaAlumno,docente),alumno)= if (alumno' = alumno) then //PREGUNTAR. Si regresa del baño puede ir al toque otra vez?
+tendria q hacer un if vacia then puede ir else false? y si son diferentes alumnos q pasa?
+													if 
+----------------------------------------------------------------------------------------------------
+
+
+filaActual(abrirBaño()) = vacio
+filaActual(alumnoVaALaFila(filaAlumno, alumno'), alumno) = if (alumno' = alumno) then encolar(alumno, filaAlumno) else filaActual(gdb,alumno) //PREGUNTAR, creo q falta el caso base
+filaActual(saleDeLaFila(filaAlumno, alumno)) = SACO ALUMNO DE COLA. TAMBIEN ME CONFUNDE SI LE TENGO QUE PASAR O NO FILA ALUMNO
+filaActual(regresaAlumno(alumno, filaAlumno)) : If vacia?(filaAlumno)  then vacia 
+										else 
+											if (tamaño(filaAlumno) < 5) then DESENCOLAFILA  //le saco el primer alumno
+												else vacio 						//porque se fueron todos con un docente, entonces queda la fila vacia
+
+											fi
+									   fi
+
+----------------------------------------------------------------------------------------------------
+
+alumnosEnElBaño(abroBaño) = vacio
+alumnosEnElBaño(alumnoVaALafila(filaAlumno,alumno)) = alumnoEnElBaño(gdb)
+alumnosEnElBaño(saleDeLaFila(filaAlumno,alumno)) = alumnoEnELBaño(gdb)
+alumnosEnElBaño(regrasaAlumno(alumno,filaAlumno)) = vacio
+
+----------------------------------------------------------------------------------------------------
+
+#queFueAlgunAlumno(abrirBaño()) = vacio
+#queFueAlgunAlumno(alumnoVaALaFila(filaAlumno, alumno)) = conj(datoAlumno)
+#queFueAlgunAlumno(saleDeLaFila(filaAlumno, alumno)) =  conj(datoAlumno)
+#queFueAlgunAlumno(regresaAlumno(alumno,filaAlumno)) =  if (p1(dameUno(#queFueAlgunAlumno(gdb)) = alumno) then p2(dameUno(#queFueAlgunAlumno(gdb)) SUMO UNO A P2

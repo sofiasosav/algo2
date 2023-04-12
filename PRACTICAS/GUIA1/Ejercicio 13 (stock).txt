@@ -1,0 +1,14 @@
+EJERCICIO 13 (STOCK)
+
+OBSERVADORES BASICOS
+ventas: stock x producto -> cantidad
+compras: stock x producto -> cantidad
+tieneSustituto?: stock x producto -> bool
+
+
+GENERADORES
+abroStock: -> stock
+agregarProducto: stock x producto -> stock 
+
+registroVenta: stock x producto -> stock
+registroCompra: stock x producto -> stock
